@@ -1,8 +1,3 @@
-#PseudoEntityRandoms.use_top_100_nouns = false
-#PseudoEntityRandoms.use_top_100_adjectives = false
-#PseudoEntityRandoms.use_top_last_names = false
-#PseudoEntityRandoms.external_cache_directory = nil#File.join(this_dir, 'cache')
-
 class PseudoEntity
 
   require 'pseudo_entity/randoms'
