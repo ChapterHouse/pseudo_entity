@@ -144,12 +144,12 @@ module PseudoEntity::Randoms
 
   def random_alpha(size)
     chars = ('a'..'z').to_a + ('A'..'Z').to_a
-    (0..size).map { chars[rand(52)] }.join
+    (1..size).map { chars[rand(52)] }.join
   end
 
   def random_alpha_numeric(size)
     chars = ('a'..'z').to_a + ('A'..'Z').to_a + (0..9).to_a
-    (0..size).map { chars[rand(62)] }.join
+    (1..size).map { chars[rand(62)] }.join
   end
 
   def random_apartment_number
@@ -488,7 +488,7 @@ module PseudoEntity::Randoms
           # Call the block and get the full set of data
           original_data = yield
           # Save the results into the external cache if it is large enough
-          save_external_cache(name, original_data) #if data.respond_to?(:size) && data.size >= 250000 # TODO: Change this to something that saves based off of the time it took to generate.
+          save_external_cache(name, original_data) # TODO: Change this to something that saves based off of the time it took to generate.
         end
         # Store the data so we never have to call that block again
         original_data_set(name, original_data)
@@ -860,9 +860,9 @@ module PseudoEntity::Randoms
     if external_cache_directory
       external_cache_directory.find do |directory|
         begin
-          puts "Saving #{external_cache}"
-          File.open(File.join(dir, "#{name}.cache"), 'w') { |file| Marshal.dump(data, file) }
-          #File.open(File.join(dir, "#{name}.cache"), 'w' ) { |f| YAML.dump( data, f ) } # Very very slow
+          puts "Saving #{File.join(directory, "#{name}.cache")}"
+          File.open(File.join(directory, "#{name}.cache"), 'w') { |file| Marshal.dump(data, file) }
+          #File.open(File.join(directory, "#{name}.cache"), 'w' ) { |f| YAML.dump( data, f ) } # Very very slow
         rescue Errno::ENOTDIR, Errno::ENOENT, Errno::EACCES
           nil
         end
