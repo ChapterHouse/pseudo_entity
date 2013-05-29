@@ -24,7 +24,7 @@ module PseudoEntity::Randoms
                   :noun,                :adjective
   ]
 
-  ArityValues = [/^numeric_\d+$/, /^alpha_\d+$/, /^alpha_numeric_\d+$/, /^token_\d+$/]
+  ArityValues = [/^numeric_\d+$/, /^alpha_\d+$/, /^alpha_numeric_\d+$/, /^token_\d+$/, /^rand_\d+$/]
   ArityRandoms = [/^random_numeric_\d+$/, /^random_alpha_\d+$/, /^random_alpha_numeric_\d+$/, /^random_token_\d+$/]
 
 
@@ -98,11 +98,19 @@ module PseudoEntity::Randoms
       self.class.send(:private, name)
       send(name)
     elsif arity_value?(name)
+      iv_name = "@#{name}".to_sym
+      command = "random_#{name}".to_sym
+      relay = arity_random?(command)
+      if !relay
+        size = /.*_(\d+)$/.match(name)[1].to_i
+        command = (/(.*)_\d+$/.match(name.to_s)[1]).to_sym
+        object = Kernel
+      end
       self.class.send(:define_method, name) do
-        iv = instance_variable_get("@#{name}".to_sym)
+        iv = instance_variable_get(iv_name)
         if iv.nil?
-          iv = send("random_#{name}".to_sym)
-          instance_variable_set("@#{name}".to_sym, iv)
+          iv = relay ? send(command) : object.send(command, size)
+          instance_variable_set(iv_name, iv)
         end
         iv
       end
@@ -110,7 +118,6 @@ module PseudoEntity::Randoms
     else
       super
     end
-
   end
 
   def respond_to?(method, include_all=false)
@@ -144,12 +151,12 @@ module PseudoEntity::Randoms
 
   def random_alpha(size)
     chars = ('a'..'z').to_a + ('A'..'Z').to_a
-    (1..size).map { chars[rand(52)] }.join
+    (1..size).map { chars[rand(chars.size)] }.join
   end
 
   def random_alpha_numeric(size)
     chars = ('a'..'z').to_a + ('A'..'Z').to_a + (0..9).to_a
-    (1..size).map { chars[rand(62)] }.join
+    (1..size).map { chars[rand(chars.size)] }.join
   end
 
   def random_apartment_number
@@ -417,7 +424,6 @@ module PseudoEntity::Randoms
   def random_token_64
     PseudoEntity::Randoms.token_64
   end
-
 
   def random_uuid
     PseudoEntity::Randoms.uuid
@@ -706,64 +712,31 @@ module PseudoEntity::Randoms
   end
 
   def self.time_shift(distance = :days, direction = nil)
-    years = 0
-    months = 0
-    days = 0
-    hours = 0
-    minutes = 0
-    seconds = 0
-
-    # TODO: This could use a new refactoring. Just randomly choose the seconds based off of the distance.
-    case distance
-    when :years
-      years = rand(10)
-      months = rand(12)
-      days = rand(30)
-      hours = rand(24)
-      minutes = rand(60)
-      seconds = rand(60)
-    when :months
-      months = rand(12)
-      days = rand(30)
-      hours = rand(24)
-      minutes = rand(60)
-      seconds = rand(60)
-    when :days
-      days = rand(30)
-      hours = rand(24)
-      minutes = rand(60)
-      seconds = rand(60)
-    when :hours
-      hours = rand(24)
-      minutes = rand(60)
-      seconds = rand(60)
-    when :minutes
-      minutes = rand(60)
-      seconds = rand(60)
-    when :seconds
-      seconds = rand(60)
-    end
+    shift =
+      case distance
+      when :centuries
+        1000.years
+      when :decades
+        100.years
+      when :years
+        10.years
+      when :months
+        12.months
+      when :days
+        30.days
+      when :hours
+        24.hours
+      when :minutes
+        60.minutes
+      when :seconds
+        60.seconds
+      else
+        distance
+      end.to_f * rand
 
     direction = direction.to_s if direction
-    shift = years.years + months.months + days.days + hours.hours + minutes.minutes + seconds.seconds
     shift *= -1 if direction.starts_with?('backward') || (!direction || direction == 'either') && rand(2) == 1
     shift
-  end
-
-  def self.token_8
-    token(8)
-  end
-
-  def self.token_16
-    token(16)
-  end
-
-  def self.token_32
-    token(32)
-  end
-
-  def self.token_64
-    token(64)
   end
 
   def self.token(size)
