@@ -226,7 +226,7 @@ describe PseudoEntity::Randoms do
 
       it "is one of the non routable IP addresses" do
         ip_address = instance.send(:random_ip_address)
-        ip_address.should =~ class_a_regex || ip_address =~ class_b_regex || ip_address =~ class_c_regex
+        [class_a_regex, class_b_regex, class_c_regex].any? { |regexp| ip_address =~ regexp }.should be_true
       end
 
     end
