@@ -10,6 +10,7 @@ module PseudoEntity::Randoms
 
   require 'pseudo_entity/randoms/constants'
   require 'pseudo_entity/randoms/location'
+  require 'pseudo_entity/randoms/huge_collection'
 
   # These are the randoms values available and are neither composites nor subsets of anything else in this list.
   RandomValues = [:apartment_number,    :bank_routing_number, :bank_account_number, :bank_name,           :birth_day,
@@ -484,41 +485,35 @@ module PseudoEntity::Randoms
       # If it also has never been initialized
       if original_data.nil?
         # Try the external cache
-        original_data = load_external_cache(name)
+        original_data = nil #load_external_cache(name)
         # If we are still out of luck
         if original_data.nil?
           # Call the block and get the full set of data
           original_data = yield
           # Save the results into the external cache if it is large enough
-          save_external_cache(name, original_data) # TODO: Change this to something that saves based off of the time it took to generate.
+          #save_external_cache(name, original_data) # TODO: Change this to something that saves based off of the time it took to generate.
         end
         # Store the data so we never have to call that block again
         original_data_set(name, original_data)
       end
       # Reset the data set that will be given to callers. They can do whatever with it. If the data set is cleared it will just be refreshed from cache.
-      data = data_set(name, original_data.respond_to?(:shuffle) ? original_data.dup.shuffle : original_data.dup)
+      data = data_set(name, original_data.respond_to?(:shuffle) ? original_data.shuffle : original_data.dup)
     end
     # Give them what they asked for
     data
   end
 
-  # Now generate the infinitely poppable arrays.
+  # Now generate the infinitely poppable arrays/enumerables.
   def self.adjectives
-    data_for_adjectives_is { use_top_100_adjectives ? TOP_100_ADJECTIVES : ADJECTIVES }
+    data_for_adjectives_is { ADJECTIVES }
   end
 
   def self.subjects
-    data_for_subjects_is do
-      with_fresh_adjectives do
-        with_fresh_nouns do
-          adjectives.product(nouns).map { |x| x.join(' ') }
-        end
-      end
-    end
+    data_for_subjects_is { RandomSubjects.new(ADJECTIVES, NOUNS) }
   end
 
   def self.bank_names
-    data_for_bank_names_is { BANK_PREFIXES.combination(2).map { |x| (x << "Bank").join(' ') }}
+    data_for_bank_names_is { RandomBankNames.new(BANK_PREFIXES) }
   end
 
   def self.cities
@@ -526,18 +521,19 @@ module PseudoEntity::Randoms
   end
 
   def self.company_names
-    data_for_company_names_is do
-      with_fresh_adjectives do
-        with_fresh_nouns do
-          with_fresh_company_types do
-            adjectives.map!(&:titleize)
-            nouns.map!(&:titleize)
-            company_types.map!(&:titleize)
-            adjectives.product(nouns).product(company_types).map { |x| x.flatten.join(' ') }
-          end
-        end
-      end
-    end
+    data_for_company_names_is { RandomCompanyNames.new(adjectives, nouns, company_types) }
+    #data_for_company_names_is do
+    #  with_fresh_adjectives do
+    #    with_fresh_nouns do
+    #      with_fresh_company_types do
+    #        adjectives.map!(&:titleize)
+    #        nouns.map!(&:titleize)
+    #        company_types.map!(&:titleize)
+    #        adjectives.product(nouns).product(company_types).map { |x| x.flatten.join(' ') }
+    #      end
+    #    end
+    #  end
+    #end
   end
 
   def self.company_types
@@ -554,9 +550,10 @@ module PseudoEntity::Randoms
 
   def self.domains
     data_for_domains_is do
-      with_fresh_nouns do
-        nouns.permutation(2).map(&:to_s).product(DOMAINS).map { |x| x.join('.') }
-      end
+      RandomDomains.new(NOUNS, DOMAINS)
+    #  #with_fresh_nouns do
+    #  #  nouns.permutation(2).map(&:to_s).product(DOMAINS).map { |x| x.join('.') }
+    #  #end
     end
   end
 
@@ -667,17 +664,6 @@ module PseudoEntity::Randoms
 
   def self.regions
     data_for_regions_is { REGIONS }
-  end
-
-
-
-  class ::Fixnum
-    require 'prime'
-    def next_prime
-      x = self + (even? ? 1 : 2)
-      x += 2 until x.prime?
-      x
-    end
   end
 
 
@@ -915,6 +901,82 @@ module PseudoEntity::Randoms
     else super
     super
     end
+  end
+
+
+  class RandomSubjects < HugeProduct
+    #adjectives.product(nouns).map { |x| x.join(' ') }
+    def initialize(adjectives, nouns)
+      super(adjectives, nouns)
+    end
+
+    def fetch(x)
+      super(x).join(' ')
+    end
+
+  end
+
+  class RandomDomains < HugeProduct
+    #nouns.permutation(2).map(&:to_s).product(DOMAINS).map { |x| x.join('.') }
+
+    def initialize(nouns, top_level_domains)
+      @nouns = HugePermutation2.new(nouns)
+      super(@nouns, top_level_domains)
+    end
+
+    def fetch(x)
+      product = super(x)
+      nouns = product.first
+      "#{nouns.join}.#{product.last}"
+    end
+
+  end
+
+  class RandomBankNames < HugeCombination2
+    # BANK_PREFIXES.combination(2).map { |x| (x << "Bank").join(' ') }}
+
+    def initialize(bank_prefixes)
+      super(bank_prefixes)
+    end
+
+    def fetch(x)
+      (super(x) << "Bank").join(' ')
+    end
+
+  end
+
+  class RandomCompanyNames < HugeProduct
+   #adjectives.product(nouns).product(company_types).map { |x| x.flatten.join(' ') }
+
+   def initialize(adjectives, nouns, company_types)
+     adjective_nouns = HugeProduct.new(adjectives.map(&:titleize), nouns.map(&:titleize))
+     super(adjective_nouns, company_types.map(&:titleize))
+   end
+
+   def fetch(x)
+     super(x).flatten.join(' ')
+   end
+
+  end
+
+  class RandomReviews < HugeProduct
+    #review_patterns.product(adjectives.product(nouns).permutation(2)
+
+    def initialize(review_patterns, adjectives, nouns)
+      subjects = RandomSubjects.new(adjectives, nouns)
+      combined_subjects = HugePermutation2.new(subjects)
+      super(review_patterns, combined_subjects)
+    end
+
+    def fetch(x)
+      product = super(x)
+      subjects = product.last
+      review = product.first
+      subjects.map!(&:split).flatten!
+      subjects
+      review % subjects
+    end
+
   end
 
 end
