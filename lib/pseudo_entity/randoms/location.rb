@@ -1,5 +1,6 @@
 require 'csv'
 require 'yaml'
+require 'tzinfo'
 
 # A four space mapping of valid area codes, zip codes, states, and counties.
 class PseudoEntity::Randoms::Location

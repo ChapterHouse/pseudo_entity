@@ -231,6 +231,23 @@ describe PseudoEntity::Randoms do
 
     end
 
+    context "#random_phone_number" do
+
+      it "is a ten digit comma separated value" do
+        instance.send(:random_phone_number).should =~ /^[0-9]{3}-[0-9]{3}-[0-9]{4}$/
+      end
+
+    end
+
+    context "#random_property_number" do
+
+      it "will never be less than 10" do
+        instance.stub(:rand).and_return(0)
+        instance.send(:random_property_number).should >= 10
+      end
+
+    end
+
   end
 
   context "as itself" do

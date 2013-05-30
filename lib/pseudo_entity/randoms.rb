@@ -199,10 +199,6 @@ module PseudoEntity::Randoms
     "192.168.#{rand(255)}.#{rand(255)}"
   end
 
-  def random_publisher_suffix
-    PseudoEntity::Randoms.publisher_suffixes.pop
-  end
-
   def random_company_name
     PseudoEntity::Randoms.company_names.pop
   end
@@ -309,7 +305,7 @@ module PseudoEntity::Randoms
   end
 
   def random_review
-    REVIEW_PATTERNS.shuffle.first % [PseudoEntity::Randoms.adjectives.pop, PseudoEntity::Randoms.nouns.pop, PseudoEntity::Randoms.adjectives.pop, PseudoEntity::Randoms.nouns.pop]
+    PseudoEntity::Randoms.reviews.pop
   end
 
   def random_salt
@@ -672,6 +668,36 @@ module PseudoEntity::Randoms
   def self.regions
     data_for_regions_is { REGIONS }
   end
+
+
+
+  class ::Fixnum
+    require 'prime'
+    def next_prime
+      x = self + (even? ? 1 : 2)
+      x += 2 until x.prime?
+      x
+    end
+  end
+
+
+  def self.reviews
+    []
+    #data_for_reviews_is do
+    #  with_fresh(:review_patterns, :adjectives, :nouns) do
+    #    review_patterns.product(adjectives.product(nouns).permutation(2).to_a).map { |x| puts x.inspect }
+    #    exit
+    #  end
+    #end
+
+    #REVIEW_PATTERNS.shuffle.first % [PseudoEntity::Randoms.adjectives.pop, PseudoEntity::Randoms.nouns.pop, PseudoEntity::Randoms.adjectives.pop, PseudoEntity::Randoms.nouns.pop]
+
+  end
+
+  def self.review_patterns
+    data_for_review_patterns_is { REVIEW_PATTERNS }
+  end
+
 
   def self.sex_of(first_name)
     if FEMALE_FIRST_NAMES.include?(first_name)
