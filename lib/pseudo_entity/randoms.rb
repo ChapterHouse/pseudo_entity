@@ -503,9 +503,9 @@ module PseudoEntity::Randoms
     data
   end
 
-  # Now generate the infinitely poppable arrays/enumerables.
+  # Now generate the infinite arrays/enumerables.
   def self.adjectives
-    data_for_adjectives_is { ADJECTIVES }
+    data_for_adjectives_is { HugeCollection.new(ADJECTIVES) }
   end
 
   def self.subjects
@@ -517,130 +517,75 @@ module PseudoEntity::Randoms
   end
 
   def self.cities
-    data_for_cities_is { CITIES }
+    data_for_cities_is { HugeCollection.new(CITIES) }
   end
 
   def self.company_names
-    data_for_company_names_is { RandomCompanyNames.new(adjectives, nouns, company_types) }
-    #data_for_company_names_is do
-    #  with_fresh_adjectives do
-    #    with_fresh_nouns do
-    #      with_fresh_company_types do
-    #        adjectives.map!(&:titleize)
-    #        nouns.map!(&:titleize)
-    #        company_types.map!(&:titleize)
-    #        adjectives.product(nouns).product(company_types).map { |x| x.flatten.join(' ') }
-    #      end
-    #    end
-    #  end
-    #end
+    data_for_company_names_is { RandomCompanyNames.new(ADJECTIVES, NOUNS, COMPANY_TYPES) }
   end
 
   def self.company_types
-    data_for_company_types_is { COMPANY_TYPES }
+    data_for_company_types_is { HugeCollection.new(COMPANY_TYPES) }
   end
 
   def self.credit_cards
-    data_for_credit_cards_is { CREDIT_CARDS }
+    data_for_credit_cards_is { HugeCollection.new(CREDIT_CARDS) }
   end
 
   def self.credit_union_names
-    data_for_credit_union_names_is { CREDIT_UNION_PREFIXES.combination(2).map { |x| (x << "Credit Union").join(' ') }}
+    data_for_bank_names_is { RandomCreditUnionNames.new(CREDIT_UNION_PREFIXES) }
   end
 
   def self.domains
-    data_for_domains_is do
-      RandomDomains.new(NOUNS, DOMAINS)
-    #  #with_fresh_nouns do
-    #  #  nouns.permutation(2).map(&:to_s).product(DOMAINS).map { |x| x.join('.') }
-    #  #end
-    end
+    data_for_domains_is { RandomDomains.new(NOUNS, DOMAINS) }
   end
 
   def self.female_first_names
-    data_for_female_first_names_is { FEMALE_FIRST_NAMES }
+    data_for_female_first_names_is { HugeCollection.new(FEMALE_FIRST_NAMES) }
   end
 
   def self.first_names
-    data_for_first_names_is do
-      with_fresh_female_first_names do
-        with_fresh_male_first_names do
-          female_first_names + male_first_names
-        end
-      end
-    end
+    data_for_first_names_is { HugeCollection.new(FEMALE_FIRST_NAMES + MALE_FIRST_NAMES) }
   end
 
   def self.last_names
-    data_for_last_names_is { use_top_last_names ? TOP_SURNAMES : SURNAMES }
+    data_for_last_names_is { HugeCollection.new(SURNAMES) }
   end
 
   def self.locations
-    data_for_locations_is { Location.load(false) }
+    data_for_locations_is { HugeCollection.new(Location.load(false)) }
   end
 
   def self.female_names
-    data_for_female_names_is do
-      with_fresh_female_first_names do
-        with_fresh_last_names do
-          female_first_names.product(last_names)
-        end
-      end
-    end
+    data_for_female_names_is { HugeProduct.new(FEMALE_FIRST_NAMES, SURNAMES) }
   end
 
   def self.female_full_names
-    data_for_female_full_names_is do
-      with_fresh_female_names do
-        female_names.map { |name| name.join(' ') }
-      end
-    end
+    data_for_female_full_names_is { RandomNames.new(FEMALE_FIRST_NAMES, SURNAMES) }
   end
 
   def self.full_names
-    data_for_full_names_is do
-      with_fresh_female_full_names do
-        with_fresh_male_names do
-          female_full_names + male_full_names
-        end
-      end
-    end
+    data_for_full_names_is { RandomNames.new(FEMALE_FIRST_NAMES + MALE_FIRST_NAMES, SURNAMES) }
   end
 
   def self.male_names
-    data_for_male_names_is do
-      with_fresh_male_first_names do
-        with_fresh_last_names do
-          male_first_names.product(last_names)
-        end
-      end
-    end
+    data_for_male_names_is { HugeProduct.new(MALE_FIRST_NAMES, SURNAMES) }
   end
 
   def self.male_first_names
-    data_for_male_first_names_is { MALE_FIRST_NAMES }
+    data_for_male_first_names_is { HugeCollection.new(MALE_FIRST_NAMES) }
   end
 
   def self.male_full_names
-    data_for_male_full_names_is do
-      with_fresh_male_names do
-        male_names.map { |name| name.join(' ') }
-      end
-    end
+    data_for_male_full_names_is { RandomNames.new(MALE_FIRST_NAMES, SURNAMES) }
   end
 
   def self.names
-    data_for_names_is do
-      with_fresh_female_names do
-        with_fresh_male_names do
-          female_names + male_names
-        end
-      end
-    end
+    data_for_names_is { HugeProduct.new(FEMALE_FIRST_NAMES + MALE_FIRST_NAMES, SURNAMES) }
   end
 
   def self.nouns
-    data_for_nouns_is { use_top_100_nouns ? TOP_100_NOUNS : NOUNS }
+    data_for_nouns_is { HugeCollection.new(NOUNS) }
   end
 
   def self.time_between(min, max)
@@ -663,25 +608,16 @@ module PseudoEntity::Randoms
 
 
   def self.regions
-    data_for_regions_is { REGIONS }
+    data_for_regions_is { HugeCollection.new(REGIONS) }
   end
 
 
   def self.reviews
-    []
-    #data_for_reviews_is do
-    #  with_fresh(:review_patterns, :adjectives, :nouns) do
-    #    review_patterns.product(adjectives.product(nouns).permutation(2).to_a).map { |x| puts x.inspect }
-    #    exit
-    #  end
-    #end
-
-    #REVIEW_PATTERNS.shuffle.first % [PseudoEntity::Randoms.adjectives.pop, PseudoEntity::Randoms.nouns.pop, PseudoEntity::Randoms.adjectives.pop, PseudoEntity::Randoms.nouns.pop]
-
+    data_for_reviews_is { RandomReviews.new(review_patterns, ADJECTIVES, NOUNS) }
   end
 
   def self.review_patterns
-    data_for_review_patterns_is { REVIEW_PATTERNS }
+    data_for_review_patterns_is { HugeCollection.new(REVIEW_PATTERNS) }
   end
 
 
@@ -696,31 +632,15 @@ module PseudoEntity::Randoms
   end
 
   def self.slogans
-    data_for_slogans_is do
-      with_fresh_slogan_patterns do
-        with_fresh_adjectives do
-          with_fresh_nouns do
-            slogan_patterns.product(adjectives).product(nouns).map { |x| x[0][0] % [x[0][1], x[1]] }
-          end
-        end
-      end
-    end
+    data_for_slogans_is { RandomSlogans.new(SLOGAN_PATTERNS, ADJECTIVES, NOUNS) }
   end
 
   def self.slogan_patterns
-    data_for_slogan_patterns_is { SLOGAN_PATTERNS }
+    data_for_slogan_patterns_is { HugeCollection.new(SLOGAN_PATTERNS) }
   end
 
   def self.street_names
-    data_for_street_names_is do
-      STREET_NAMES.inject([]) do |street_names, street_name|
-        if ["North", "South", "East", "West"].inject(false) { |rc, x| rc || street_name.include?(x) }
-          street_names << street_name
-        else
-          STREET_POSITIONS.inject(street_names) { |street_names, street_position| street_names << "#{street_position} #{street_name}".strip }
-        end
-      end
-    end
+    data_for_street_names_is { RandomStreetNames.new(STREET_POSITIONS, STREET_NAMES) }
   end
 
   def self.time_shift(distance = :days, direction = nil)
@@ -904,33 +824,6 @@ module PseudoEntity::Randoms
   end
 
 
-  class RandomSubjects < HugeProduct
-    #adjectives.product(nouns).map { |x| x.join(' ') }
-    def initialize(adjectives, nouns)
-      super(adjectives, nouns)
-    end
-
-    def fetch(x)
-      super(x).join(' ')
-    end
-
-  end
-
-  class RandomDomains < HugeProduct
-    #nouns.permutation(2).map(&:to_s).product(DOMAINS).map { |x| x.join('.') }
-
-    def initialize(nouns, top_level_domains)
-      @nouns = HugePermutation2.new(nouns)
-      super(@nouns, top_level_domains)
-    end
-
-    def fetch(x)
-      product = super(x)
-      nouns = product.first
-      "#{nouns.join}.#{product.last}"
-    end
-
-  end
 
   class RandomBankNames < HugeCombination2
     # BANK_PREFIXES.combination(2).map { |x| (x << "Bank").join(' ') }}
@@ -959,22 +852,103 @@ module PseudoEntity::Randoms
 
   end
 
+  class RandomCreditUnionNames < HugeCombination2
+    # CREDIT_UNION_PREFIXES.combination(2).map { |x| (x << "Credit Union").join(' ') }
+
+    def initialize(credit_union_prefixes)
+      super(credit_union_prefixes)
+    end
+
+    def fetch(x)
+      (super(x) << "Credit Union").join(' ')
+    end
+
+  end
+
+  class RandomDomains < HugeProduct
+    #nouns.permutation(2).map(&:to_s).product(DOMAINS).map { |x| x.join('.') }
+
+    def initialize(nouns, top_level_domains)
+      @nouns = HugePermutation2.new(nouns)
+      super(@nouns, top_level_domains)
+    end
+
+    def fetch(x)
+      product = super(x)
+      nouns = product.first
+      "#{nouns.join}.#{product.last}"
+    end
+
+  end
+
+  class RandomNames < HugeProduct
+
+    def initialize(first_names, last_names)
+      super(first_names, last_names)
+    end
+
+    def fetch(x)
+      super(x).join(' ')
+    end
+
+  end
+
   class RandomReviews < HugeProduct
-    #review_patterns.product(adjectives.product(nouns).permutation(2)
+    #review_patterns.product(adjectives.product(nouns).permutation(2))
 
     def initialize(review_patterns, adjectives, nouns)
-      subjects = RandomSubjects.new(adjectives, nouns)
+      subjects = HugeProduct.new(adjectives, nouns)
       combined_subjects = HugePermutation2.new(subjects)
       super(review_patterns, combined_subjects)
     end
 
     def fetch(x)
-      product = super(x)
-      subjects = product.last
-      review = product.first
-      subjects.map!(&:split).flatten!
-      subjects
-      review % subjects
+      review = super(x)
+      review.first % review.last.flatten
+    end
+
+  end
+
+  class RandomSlogans < HugeProduct
+    #slogan_patterns.product(adjectives).product(nouns).map { |x| x[0][0] % [x[0][1], x[1]] }
+    def initialize(slogan_patterns, adjectives, nouns)
+      subjects = HugeProduct.new(adjectives, nouns)
+      super(slogan_patterns, subjects)
+    end
+
+    def fetch(x)
+      slogan = super(x)
+      slogan.first % slogan.last
+    end
+
+  end
+
+  class RandomStreetNames < HugeProduct
+
+    def initialize(street_positions, street_names)
+      super(street_positions, street_names)
+    end
+
+    def fetch(x)
+      street = super(x)
+      # Slightly increase the likelihood of a repetition by preventing silly names like "SE Main Street North"
+      if ["North", "South", "East", "West"].any? { |x| street.last.include?(x) }
+        street.last
+      else
+        street.join(' ')
+      end
+    end
+
+  end
+
+  class RandomSubjects < HugeProduct
+    #adjectives.product(nouns).map { |x| x.join(' ') }
+    def initialize(adjectives, nouns)
+      super(adjectives, nouns)
+    end
+
+    def fetch(x)
+      super(x).join(' ')
     end
 
   end

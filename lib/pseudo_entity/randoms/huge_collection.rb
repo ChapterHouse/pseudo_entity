@@ -2,7 +2,7 @@ require 'prime'
 
 module PseudoEntity::Randoms
 
-  class HugeCollection
+  class HugeEnumerable
 
     include Enumerable
 
@@ -81,7 +81,7 @@ module PseudoEntity::Randoms
     attr_reader :index, :start_of_sequence, :end_of_sequence
 
     def collection_size
-      0
+      raise NotImplementedError, "not implemented for #{self.class.name}"
     end
 
     def end_of_sequence
@@ -89,7 +89,7 @@ module PseudoEntity::Randoms
     end
 
     def fetch(x)
-      nil
+      raise NotImplementedError, "not implemented for #{self.class.name}"
     end
 
     def iterator
@@ -142,22 +142,57 @@ module PseudoEntity::Randoms
 
   end
 
-  class HugeProduct < HugeCollection
+  class HugeCollection < HugeEnumerable
+
+    def initialize(enumerable, max_array_size = nil, rng = nil)
+      @enum = enumerable
+      super(max_array_size, rng)
+    end
+
+    def collection_size
+      enum_size
+    end
+
+    def fetch(x)
+      enum[x]
+    end
+
+    private
+
+    attr_accessor :enum
+
+    def enum_size
+      @enum_size ||= enum.size
+    end
+
+  end
+
+  class HugeProduct < HugeEnumerable
 
     def initialize(enumerable_a, enumerable_b, max_array_size = nil, rng = nil)
-      @huge_product_a = enumerable_a
-      @huge_product_b = enumerable_b
-      @huge_product_a_size = enumerable_a.size
-      @huge_product_b_size = enumerable_b.size
+      @enum_a = enumerable_a
+      @enum_b = enumerable_b
       super(max_array_size, rng)
     end
 
     def fetch(x)
-      [@huge_product_a[x / @huge_product_b_size], @huge_product_b[x % @huge_product_b_size]]
+      [enum_a[x / enum_b_size], enum_b[x % enum_b_size]]
     end
 
     def collection_size
-      @huge_product_a_size * @huge_product_b_size
+      enum_a_size * enum_b_size
+    end
+
+    private
+
+    attr_accessor :enum_a, :enum_b
+
+    def enum_a_size
+      @enum_a_size ||= enum_a.size
+    end
+
+    def enum_b_size
+      @enum_b_size ||= enum_b.size
     end
 
   end
@@ -165,8 +200,7 @@ module PseudoEntity::Randoms
   class HugePermutation2 < HugeCollection
 
     def initialize(enumerable, max_array_size = nil, rng = nil)
-      @huge_permutation_enum = enumerable
-      super(max_array_size, rng)
+      super(enumerable, max_array_size, rng)
     end
 
     def fetch(x)
@@ -179,23 +213,12 @@ module PseudoEntity::Randoms
       enum_size * (enum_size - 1)
     end
 
-    private
-
-    def enum
-      @huge_permutation_enum
-    end
-
-    def enum_size
-      @huge_permutation_enum_size ||= enum.size
-    end
-
   end
 
   class HugeCombination2 < HugeCollection
 
     def initialize(enumerable, max_array_size = nil, rng = nil)
-      @huge_combination_enum = enumerable
-      super(max_array_size, rng)
+      super(enumerable, max_array_size, rng)
     end
 
     def collection_size
@@ -218,14 +241,6 @@ module PseudoEntity::Randoms
 
     private
 
-    def enum
-      @huge_combination_enum
-    end
-
-    def enum_size
-      @huge_combination_enum_size ||= enum.size
-    end
-
     def sum(x)
       x * (x + 1) / 2
     end
@@ -237,5 +252,11 @@ module PseudoEntity::Randoms
 
   end
 
+  def compare(a, b)
+    a = a.to_a
+    b = b.to_a
+    puts a.inspect
+    puts b.inspect
+    puts (a == b).inspect
+  end
 end
-
