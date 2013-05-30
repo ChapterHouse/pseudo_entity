@@ -5,18 +5,26 @@ require 'tzinfo'
 # A four space mapping of valid area codes, zip codes, states, and counties.
 class PseudoEntity::Randoms::Location
 
+  require 'pseudo_entity/randoms/locations_hash'
+
   attr_reader :zip_code, :state, :area_code, :county, :country_code, :latitude, :longitude, :time_zone
 
-  def initialize(zip_code, state, area_code, county, country_code, latitude, longitude, time_zone=nil)
-    @zip_code = "%.5i" % zip_code.to_i
-    @state = state.to_s
-    @area_code = area_code.to_s
-    @county = county.to_s
+  #def initialize(zip_code, state, area_code, county, country_code, latitude, longitude, time_zone=nil)
+  def initialize(options={})
+    @zip_code = "%.5i" % options[:zip_code].to_i
+    @state = options[:state].to_s
+    @area_code = options[:area_code].to_s
+    @county = options[:county].to_s
     @county = @county[0..-8] if @county.downcase[-7..-1] == " county"
-    @latitude = latitude.to_f
-    @longitude = longitude.to_f
-    @country_code = country_code
-    @time_zone = ActiveSupport::TimeZone.all.find { |x| x.tzinfo == ActiveSupport::TimeZone.find_tzinfo(time_zone)} || idealized_time_zone
+    @latitude = options[:latitude].to_f
+    @longitude = options[:longitude].to_f
+    @country_code = options[:country_code]
+    time_zone = options[:time_zone]
+    unless time_zone.is_a?(ActiveSupport::TimeZone)
+      time_zone = ActiveSupport::TimeZone.all.find { |x| x.tzinfo == ActiveSupport::TimeZone.find_tzinfo(time_zone)} if time_zone
+      time_zone = idealized_time_zone if time_zone.nil?
+    end
+    @time_zone = time_zone
   end
 
   def to_s
@@ -32,6 +40,9 @@ class PseudoEntity::Randoms::Location
     ].join("\n")
   end
 
+  def to_hash
+    {:zip_code => zip_code, :state => state, :area_code => area_code, :county => county, :country_code => country_code, :latitude => latitude, :longitude => longitude, :time_zone => time_zone.to_s}
+  end
 
   def self.from_csv(csv_file=File.expand_path(File.join(File.dirname(__FILE__), 'zip_code_database.csv')))
     #puts "Loading locations from #{csv_file}"
@@ -57,7 +68,7 @@ class PseudoEntity::Randoms::Location
       country_code = row[12]
 
       area_codes.split(',').each do |area_code|
-        locations << new(zip_code, state, area_code, county, country_code, latitude, longitude, time_zone)
+        locations << new(:zip_code => zip_code, :state => state, :area_code => area_code, :county => county, :country_code => country_code, :latitude => latitude, :longitude => longitude, :time_zone => time_zone)
       end
 
       locations
@@ -69,6 +80,10 @@ class PseudoEntity::Randoms::Location
   def self.from_yaml(yaml_file=File.expand_path(File.join(File.dirname(__FILE__), 'locations.yaml')))
     #puts "Loading locations from #{yaml_file}"
     YAML::load(File.open(yaml_file))
+  end
+
+  def self.from_hashes
+    LOCATIONS_HASH.map { |hash| new(hash) }
   end
 
   def self.load(auto_yaml=true)
@@ -94,3 +109,4 @@ class PseudoEntity::Randoms::Location
   end
 
 end
+
