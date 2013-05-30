@@ -104,7 +104,7 @@ class PseudoEntity::Randoms::Location
   private
 
   def idealized_time_zone
-    offset = ((( latitude + 187.5 ) / 15).to_i - 12) * 3600
+    offset = ((( longitude + 187.5 ) / 15).to_i - 12) * 3600
     ActiveSupport::TimeZone.all.find { |tz| tz.utc_offset == offset }
   end
 
