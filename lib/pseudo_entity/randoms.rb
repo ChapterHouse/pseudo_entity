@@ -553,7 +553,7 @@ module PseudoEntity::Randoms
   end
 
   def self.locations
-    data_for_locations_is { HugeCollection.new(Location.load(false)) }
+    data_for_locations_is { RandomLocations.new(LOCATIONS_HASH) }
   end
 
   def self.female_names
@@ -889,6 +889,23 @@ module PseudoEntity::Randoms
 
     def fetch(x)
       super(x).join(' ')
+    end
+
+  end
+
+  class RandomLocations < HugeCollection
+
+    def initialize(locations)
+      super(locations.dup)
+    end
+
+    def fetch(x)
+      location = super(x)
+      if location.is_a?(Hash)
+        location = Location.new(location)
+        enum[x] = location
+      end
+      location
     end
 
   end
