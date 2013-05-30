@@ -31,48 +31,6 @@ module PseudoEntity::Randoms
 
   include Constants
 
-  # Use the top 100 nouns for generation instead of the larger set?
-  # Affects number of unique company_names, domains, and slogans.
-  def self.use_top_100_nouns
-    #@use_top_100_nouns = true if @use_top_100_nouns.nil?
-    @use_top_100_nouns
-  end
-
-  def self.use_top_100_nouns=(new_value)
-    @use_top_100_nouns = new_value
-  end
-
-  # Use the top 100 adjectives for generation instead of the larger set?
-  # Affects number of unique company_names, and slogans.
-  def self.use_top_100_adjectives
-    #@use_top_100_adjectives = true if @use_top_100_adjectives.nil?
-    @use_top_100_adjectives
-  end
-
-  def self.use_top_100_adjectives=(new_value)
-    @use_top_100_adjectives = new_value
-  end
-
-  # Use the top last names for generation instead of the larger set?
-  # Affects number of unique female_names, male_names, names, female_full_names, male_full_names, and full_names.
-  def self.use_top_last_names
-    #@use_top_last_names = true if @use_top_last_names.nil?
-    @use_top_last_names
-  end
-
-  def self.use_top_last_names=(new_value)
-    @use_top_last_names = new_value
-  end
-
-  def self.external_cache_directory
-    @external_cache_directory
-  end
-
-  def self.external_cache_directory=(directory)
-    @external_cache_directory = [directory] unless directory.is_a?(Array)
-  end
-  self.external_cache_directory = File.expand_path(File.join(File.dirname(__FILE__), 'randoms', 'cache'))
-
   # Create the lazy loading accessors
   RandomValues.each do |value_name|
     class_eval %{
@@ -484,15 +442,8 @@ module PseudoEntity::Randoms
       original_data = original_data_get(name)
       # If it also has never been initialized
       if original_data.nil?
-        # Try the external cache
-        original_data = nil #load_external_cache(name)
-        # If we are still out of luck
-        if original_data.nil?
-          # Call the block and get the full set of data
-          original_data = yield
-          # Save the results into the external cache if it is large enough
-          #save_external_cache(name, original_data) # TODO: Change this to something that saves based off of the time it took to generate.
-        end
+        # Call the block and get the full set of data
+        original_data = yield
         # Store the data so we never have to call that block again
         original_data_set(name, original_data)
       end
@@ -738,41 +689,6 @@ module PseudoEntity::Randoms
     results = next_name ? with_fresh(next_name, *other_names, &block) : yield
     data_set(name, old_values)
     results
-  end
-
-
-
-  def self.load_external_cache(name)
-    if external_cache_directory
-      external_cache_directory.inject(nil) do |data, directory|
-        if data.blank?
-          begin
-            File.open(File.join(directory, "#{name}.cache")) { |file| Marshal.load(file) }
-          rescue Errno::ENOTDIR, Errno::ENOENT, Errno::EACCES
-            nil
-          end
-        else
-          data
-        end
-      end
-    else
-      nil
-    end
-  end
-
-
-  def self.save_external_cache(name, data)
-    if external_cache_directory
-      external_cache_directory.find do |directory|
-        begin
-          puts "Saving #{File.join(directory, "#{name}.cache")}"
-          File.open(File.join(directory, "#{name}.cache"), 'w') { |file| Marshal.dump(data, file) }
-          #File.open(File.join(directory, "#{name}.cache"), 'w' ) { |f| YAML.dump( data, f ) } # Very very slow
-        rescue Errno::ENOTDIR, Errno::ENOENT, Errno::EACCES
-          nil
-        end
-      end
-    end
   end
 
   def self.preload
