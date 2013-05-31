@@ -47,6 +47,35 @@ module PseudoEntity::Randoms
       end
     end
 
+    def sample(*args)
+      if args.size > 2
+        raise ArgumentError, "wrong number of arguments (#{args.size} for 2)"
+      elsif args.size == 2
+        n = args.first
+        rng = args.last
+      elsif args.size == 1
+        arg = args.first
+        if arg.is_a?(Proc) || arg.is_a?(Method)
+          n = 1
+          rng = arg
+        else
+          n = arg
+          rng = method(:rand)
+        end
+      else
+        n = nil
+        rng = method(:rand)
+      end
+
+      raise ArgumentError, 'negative sample number' if n.to_i < 0
+      unless empty?
+        n ? (0...remaining_or(n.to_i)).map { sample1(rng) } : sample1(rng)
+      else
+        n.nil ? nil : []
+      end
+
+    end
+
     def shift(n = nil)
       raise ArgumentError, 'negative array size' if n.to_i < 0
       unless empty?
@@ -61,12 +90,10 @@ module PseudoEntity::Randoms
     end
 
     def shuffle!(rng=nil)
-      # TODO: Change the prime to change the shuffle
       rng ||= self.rng
       @start_of_sequence = 0
       @end_of_sequence = nil
       @shuffle_head = rng.call(collection_size)
-      #@index = nil
       @iterator = next_prime(( 2 * collection_size / (1 + Math.sqrt(5)) ).to_i)
       self
     end
@@ -138,6 +165,15 @@ module PseudoEntity::Randoms
       else
         fetch(shuffle_index(i))
       end
+    end
+
+    def sample1(rng)
+      if @sample_position.nil? || @sample_position >= size
+        @sample_position = rng.call(size)
+      else
+        @sample_position = (@sample_position + next_prime(( 2 * size / (1 + Math.sqrt(5)) ).to_i)) % size
+      end
+      _fetch(@sample_position)
     end
 
   end
