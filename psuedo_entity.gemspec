@@ -22,9 +22,9 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rake'
   spec.add_development_dependency 'rspec', '~> 2.13'
 
-  spec.add_dependency 'uuidtools', '~> 2.1'
-  spec.add_dependency 'active_support', '>= 2.0'
-  spec.add_dependency 'tzinfo'
-
+  spec.add_runtime_dependency 'uuidtools', '~> 2.1'
+  spec.add_runtime_dependency 'active_support', '>= 2.0'
+  spec.add_runtime_dependency 'tzinfo'
+  spec.add_runtime_dependency 'huge_enumerable'
 
 end
