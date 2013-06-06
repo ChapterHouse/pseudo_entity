@@ -5,12 +5,12 @@ rescue LoadError
 end
 
 require 'uuidtools'
+require 'huge_enumerable'
 
 module PseudoEntity::Randoms
 
   require 'pseudo_entity/randoms/constants'
   require 'pseudo_entity/randoms/location'
-  require 'pseudo_entity/randoms/huge_collection'
 
   # These are the randoms values available and are neither composites nor subsets of anything else in this list.
   RandomValues = [:apartment_number,    :bank_routing_number, :bank_account_number, :bank_name,           :birth_day,
@@ -741,11 +741,11 @@ module PseudoEntity::Randoms
 
 
 
-  class RandomBankNames < HugeCombination2
+  class RandomBankNames < HugeCombination
     # BANK_PREFIXES.combination(2).map { |x| (x << "Bank").join(' ') }}
 
     def initialize(bank_prefixes)
-      super(bank_prefixes)
+      super(bank_prefixes, 2)
     end
 
     def fetch(x)
@@ -768,11 +768,11 @@ module PseudoEntity::Randoms
 
   end
 
-  class RandomCreditUnionNames < HugeCombination2
+  class RandomCreditUnionNames < HugeCombination
     # CREDIT_UNION_PREFIXES.combination(2).map { |x| (x << "Credit Union").join(' ') }
 
     def initialize(credit_union_prefixes)
-      super(credit_union_prefixes)
+      super(credit_union_prefixes, 2)
     end
 
     def fetch(x)
@@ -785,7 +785,7 @@ module PseudoEntity::Randoms
     #nouns.permutation(2).map(&:to_s).product(DOMAINS).map { |x| x.join('.') }
 
     def initialize(nouns, top_level_domains)
-      @nouns = HugePermutation2.new(nouns)
+      @nouns = HugePermutation.new(nouns, 2)
       super(@nouns, top_level_domains)
     end
 
@@ -831,7 +831,7 @@ module PseudoEntity::Randoms
 
     def initialize(review_patterns, adjectives, nouns)
       subjects = HugeProduct.new(adjectives, nouns)
-      combined_subjects = HugePermutation2.new(subjects)
+      combined_subjects = HugePermutation.new(subjects, 2)
       super(review_patterns, combined_subjects)
     end
 
