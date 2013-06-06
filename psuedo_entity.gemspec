@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ['ChapterHouse.Dune@gmail.com']
   spec.description   = %q{A class for generating realistic looking data for people, companies, etc.}
   spec.summary       = %q{A class for generating realistic looking data for people, companies, etc.}
-  spec.homepage      = 'https://github.com/ChapterHouse/pseudo_entity'
+  spec.homepage      = 'http://chapterhouse.github.io/pseudo_entity'
   spec.license       = 'MIT'
 
   spec.files         = `git ls-files`.split($/)
