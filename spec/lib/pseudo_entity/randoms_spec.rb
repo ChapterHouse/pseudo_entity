@@ -38,7 +38,7 @@ describe PseudoEntity::Randoms do
     end
 
     it "lists all RandomValues as methods" do
-      (PseudoEntity::RandomValues - instance.methods).should be_empty
+      (PseudoEntity::RandomValues.map(&:to_s) - instance.methods.map(&:to_s)).should be_empty
     end
 
     it "responds to ArityValues" do
@@ -57,7 +57,7 @@ describe PseudoEntity::Randoms do
     end
 
     it "has corresponding private random_X methods for RandomValues" do
-      (PseudoEntity::RandomValues.map { |method| "random_#{method}".to_sym } - instance.private_methods).should be_empty
+      (PseudoEntity::RandomValues.map { |method| "random_#{method}".to_sym } - instance.private_methods.map(&:to_sym)).should be_empty
     end
 
     context "#parse_options" do
@@ -239,7 +239,16 @@ describe PseudoEntity::Randoms do
 
     end
 
-    context "#random_property_number" do
+    context  "#random_property_number" do
+
+      it "will never be less than 10" do
+        instance.stub(:rand).and_return(0)
+        instance.send(:random_property_number).should >= 10
+      end
+
+    end
+
+    context "#random_sex" do
 
       it "will never be less than 10" do
         instance.stub(:rand).and_return(0)

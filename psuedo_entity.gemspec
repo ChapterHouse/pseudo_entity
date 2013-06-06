@@ -23,7 +23,8 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rspec', '~> 2.13'
 
   spec.add_runtime_dependency 'uuidtools', '~> 2.1'
-  spec.add_runtime_dependency 'active_support', '>= 2.0'
+  spec.add_runtime_dependency 'activesupport', '>= 2.0'
+  spec.add_runtime_dependency 'iconv' # This is here only while I support activesupport < 3 which is about as long as I support ruby 1.8.7
   spec.add_runtime_dependency 'tzinfo'
   spec.add_runtime_dependency 'huge_enumerable'
 
