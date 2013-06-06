@@ -46,10 +46,9 @@ module PseudoEntity::Randoms
   end
 
   def method_missing(name, *args, &block)
-
     if arity_random?(name)
       # Define random_X helpers on the fly
-      size = /.*_(\d+)$/.match(name)[1].to_i
+      size = /.*_(\d+)$/.match(name.to_s)[1].to_i
       base_name = (/(.*)_\d+$/.match(name.to_s)[1]).to_sym
       self.class.send(:define_method, name) do
         self.send(base_name, size)
@@ -84,7 +83,7 @@ module PseudoEntity::Randoms
   end if RUBY_VERSION < "1.9"
 
   def respond_to_missing?(method, include_all=false)
-   include_all && arity_random?(method) || arity_value?(method) || super
+  include_all && arity_random?(method) || arity_value?(method) || super
   end if RUBY_VERSION >= "1.9"
 
   private
@@ -365,19 +364,19 @@ module PseudoEntity::Randoms
   end
 
   def random_token_8
-    PseudoEntity::Randoms.token_8
+    PseudoEntity::Randoms.token(8)
   end
 
   def random_token_16
-    PseudoEntity::Randoms.token_16
+    PseudoEntity::Randoms.token(16)
   end
 
   def random_token_32
-    PseudoEntity::Randoms.token_32
+    PseudoEntity::Randoms.token(32)
   end
 
   def random_token_64
-    PseudoEntity::Randoms.token_64
+    PseudoEntity::Randoms.token(64)
   end
 
   def random_uuid
