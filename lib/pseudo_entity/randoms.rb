@@ -60,7 +60,7 @@ module PseudoEntity::Randoms
       command = "random_#{name}".to_sym
       relay = arity_random?(command)
       if !relay
-        size = /.*_(\d+)$/.match(name)[1].to_i
+        size = /.*_(\d+)$/.match(name.to_s)[1].to_i
         command = (/(.*)_\d+$/.match(name.to_s)[1]).to_sym
         object = Kernel
       end

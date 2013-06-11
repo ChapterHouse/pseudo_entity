@@ -257,17 +257,28 @@ describe PseudoEntity::Randoms do
 
     end
 
+    context "#rand_X" do
+
+      it "generates a random number" do
+        Kernel.should_receive(:rand).with(10).once.and_call_original
+        first = instance.rand_10
+        second = instance.rand_10
+        first.should eql(second)
+      end
+
+    end
+
   end
 
   context "as itself" do
 
     subject(:random) { PseudoEntity::Randoms }
 
-    it "should create a token smaller than 32 characters" do
+    it "creates a token smaller than 32 characters" do
       random.token(3).size.should eq(3)
     end
 
-    it "should create a token larger than 32 characters" do
+    it "creates a token larger than 32 characters" do
       random.token(128).size.should eq(128)
     end
 
