@@ -44,6 +44,16 @@ class PseudoEntity
     self
   end
 
+  def reset(value_name)
+    value_name = value_name.to_s.to_sym
+    if self.respond_to?(value_name)
+      instance_variable_set("@#{value_name}".to_sym, nil)
+      self.send(value_name)
+    else
+      nil
+    end
+  end
+
   def street_address
     # Yes it is in 2-1 order because that's how the US Post Office says to do it.
     # Apartment, Suites, etc go on the first line if there are two lines or at the end of the single line

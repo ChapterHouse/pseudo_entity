@@ -65,24 +65,39 @@ describe PseudoEntity do
   end
 
   it "should not return new values without resetting" do
-    names = [ 'Jack', 'Jill' ]
     pseudo_entity = PseudoEntity.new
-    pseudo_entity.stub(:random_first_name).and_return(names.shift)
-    pseudo_entity.first_name.should equal(pseudo_entity.first_name)
+    first_name = pseudo_entity.first_name
+    pseudo_entity.first_name.should equal(first_name)
   end
 
   it "should return new values after a reset" do
-    names = [ 'Jack', 'Jill' ]
     pseudo_entity = PseudoEntity.new
-    pseudo_entity.stub(:random_first_name).and_return(names.shift)
-    name = pseudo_entity.first_name
+    first_name = pseudo_entity.first_name
+    last_name = pseudo_entity.last_name
     pseudo_entity.reset!
-    pseudo_entity.stub(:random_first_name).and_return(names.shift)
-    pseudo_entity.first_name.should_not eql(name)
+    pseudo_entity.first_name.should_not eql(first_name)
+    pseudo_entity.last_name.should_not eql(last_name)
   end
 
   it "should return self after a reset" do
     pseudo_entity.reset!.should equal(pseudo_entity)
+  end
+
+  it "should reset a single value" do
+    pseudo_entity = PseudoEntity.new
+    first_name = pseudo_entity.first_name
+    last_name = pseudo_entity.last_name
+    pseudo_entity.reset("first_name")
+    pseudo_entity.first_name.should_not eql(first_name)
+    pseudo_entity.last_name.should eql(last_name)
+  end
+
+  it "should return the new value after a reset of a single value" do
+    pseudo_entity = PseudoEntity.new
+    first_name_a = pseudo_entity.first_name
+    first_name_b = pseudo_entity.reset("first_name")
+    first_name_a.should_not eql(first_name_b)
+    first_name_b.should eql(pseudo_entity.first_name)
   end
 
   it "should combine addresses in 2,1 order" do
