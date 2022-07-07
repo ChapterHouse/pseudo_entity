@@ -34,7 +34,7 @@ describe PseudoEntity::Randoms do
     end
 
     it "responds to all RandomValues" do
-      PseudoEntity::RandomValues.all? { |method| instance.respond_to?(method.to_sym) }.should be_true
+      expect(PseudoEntity::RandomValues.all? { |method| instance.respond_to?(method.to_sym) }).to be_truthy
     end
 
     it "lists all RandomValues as methods" do
@@ -43,17 +43,17 @@ describe PseudoEntity::Randoms do
 
     it "responds to ArityValues" do
       methods = PseudoEntity::ArityValues.map { |regexp| regexp.to_s.match(/.*\^(.*_)\\d.*/)[1] + rand(100).to_s }
-      methods.all? { |method| instance.respond_to?(method.to_sym) }.should be_true
+      expect(methods.all? { |method| instance.respond_to?(method.to_sym) }).to be_truthy
     end
 
     it "responds to ArityRandoms" do
       methods = PseudoEntity::ArityRandoms.map { |regexp| regexp.to_s.match(/.*\^(.*_)\\d.*/)[1] + rand(100).to_s }
-      methods.all? { |method| instance.respond_to?(method.to_sym, true) }.should be_true
+      expect(methods.all? { |method| instance.respond_to?(method.to_sym, true) }).to be_truthy
     end
 
     it "has private ArityRandoms" do
       methods = PseudoEntity::ArityRandoms.map { |regexp| regexp.to_s.match(/.*\^(.*_)\\d.*/)[1] + rand(100).to_s }
-      methods.all? { |method| !instance.respond_to?(method.to_sym) }.should be_true
+      expect(methods.all? { |method| !instance.respond_to?(method.to_sym) }).to be_truthy
     end
 
     it "has corresponding private random_X methods for RandomValues" do
@@ -66,7 +66,7 @@ describe PseudoEntity::Randoms do
         value_names = PseudoEntity::RandomValues
         hash = value_names.inject({}) { |hsh, name| hsh[name] = "123 #{name}"; hsh}
         instance.send(:parse_options, hash)
-        value_names.all? { |name| instance.send(name) == "123 #{name}" }.should be_true
+        expect(value_names.all? { |name| instance.send(name) == "123 #{name}" }).to be_truthy
       end
 
     end
@@ -226,7 +226,7 @@ describe PseudoEntity::Randoms do
 
       it "is one of the non routable IP addresses" do
         ip_address = instance.send(:random_ip_address)
-        [class_a_regex, class_b_regex, class_c_regex].any? { |regexp| ip_address =~ regexp }.should be_true
+        expect([class_a_regex, class_b_regex, class_c_regex].any? { |regexp| ip_address =~ regexp }).to be_truthy
       end
 
     end

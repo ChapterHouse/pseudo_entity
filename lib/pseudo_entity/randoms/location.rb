@@ -19,12 +19,11 @@ class PseudoEntity::Randoms::Location
     @latitude = options[:latitude].to_f
     @longitude = options[:longitude].to_f
     @country_code = options[:country_code]
-    time_zone = options[:time_zone]
-    unless time_zone.is_a?(ActiveSupport::TimeZone)
-      time_zone = ActiveSupport::TimeZone.all.find { |x| x.tzinfo == ActiveSupport::TimeZone.find_tzinfo(time_zone)} if time_zone
-      time_zone = idealized_time_zone if time_zone.nil?
+    @time_zone = options[:time_zone]
+    unless @time_zone.is_a?(ActiveSupport::TimeZone)
+      tzinfo = ActiveSupport::TimeZone.find_tzinfo(@time_zone.to_s.sub(/^\(.*?\) /, '')) rescue nil
+      @time_zone = tzinfo && ActiveSupport::TimeZone.all.find { |x| x.tzinfo == tzinfo } || idealized_time_zone
     end
-    @time_zone = time_zone
   end
 
   def to_s

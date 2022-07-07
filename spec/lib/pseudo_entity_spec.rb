@@ -43,9 +43,9 @@ describe PseudoEntity do
 
   it "should identify when an address is and is not an apartment" do
     pseudo_entity.stub(:street_modifier_needed).and_return(:apartment)
-    pseudo_entity.apartment?.should be_true
+    expect(pseudo_entity.apartment?).to be_truthy
     pseudo_entity.stub(:street_modifier_needed).and_return(:something_else)
-    pseudo_entity.apartment?.should be_false
+    expect(pseudo_entity.apartment?).to be_falsey
   end
 
   it "should extract birth year" do
@@ -149,9 +149,9 @@ describe PseudoEntity do
 
   it "should identify when an address is and is not an suite" do
     pseudo_entity.stub(:street_modifier_needed).and_return(:suite)
-    pseudo_entity.suite?.should be_true
+    expect(pseudo_entity.suite?).to be_truthy
     pseudo_entity.stub(:street_modifier_needed).and_return(:something_else)
-    pseudo_entity.suite?.should be_false
+    expect(pseudo_entity.suite?).to be_falsey
   end
 
   it "should generate a yelp business id from the company name and the city" do
