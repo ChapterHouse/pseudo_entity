@@ -33,11 +33,9 @@ module PseudoEntity::Randoms
 
   # Create the lazy loading accessors
   RandomValues.each do |value_name|
-    class_eval %{
-      def #{value_name}
-        @#{value_name} ||= random_#{value_name}
-      end
-    }
+    iv = :"@#{value_name}"
+    random_value = "random_#{value_name}"
+    define_method(value_name) { instance_variable_set(iv, instance_variable_get(iv) || send(random_value)) }
   end
 
   # Im still not happy about this but at least it is out of PseudoEntity.
