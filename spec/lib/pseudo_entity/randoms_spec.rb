@@ -38,7 +38,7 @@ describe PseudoEntity::Randoms do
     end
 
     it "lists all RandomValues as methods" do
-      (PseudoEntity::RandomValues.map(&:to_s) - instance.methods.map(&:to_s)).should be_empty
+      expect(PseudoEntity::RandomValues.map(&:to_s) - instance.methods.map(&:to_s)).to be_empty
     end
 
     it "responds to ArityValues" do
@@ -57,7 +57,7 @@ describe PseudoEntity::Randoms do
     end
 
     it "has corresponding private random_X methods for RandomValues" do
-      (PseudoEntity::RandomValues.map { |method| "random_#{method}".to_sym } - instance.private_methods.map(&:to_sym)).should be_empty
+      expect(PseudoEntity::RandomValues.map { |method| "random_#{method}".to_sym } - instance.private_methods.map(&:to_sym)).to be_empty
     end
 
     context "#parse_options" do
@@ -74,15 +74,16 @@ describe PseudoEntity::Randoms do
     context "#random_alpha" do
 
       it "returns X characters" do
-        instance.send(:random_alpha, 256).size.should eql(256)
+        expect(instance.send(:random_alpha, 256).size).to eql(256)
       end
 
       it "only generates alphabetic characters" do
-        instance.stub(:rand).and_return(*(0..51).to_a)
-        instance.send(:random_alpha, 256).should be_all_alphanumeric_characters
+        i = -1
+        expect(instance).to receive(:rand).exactly(512).times { i = i + 1 % 52 }
+        expect(instance.send(:random_alpha, 512)).to be_all_alphanumeric_characters
         # If only alphabetic characters are available then nothing should show up at slot 52
-        instance.stub(:rand).and_return(52)
-        instance.send(:random_alpha, 1).size.should eq(0)
+        expect(instance).to receive(:rand).and_return(52)
+        expect(instance.send(:random_alpha, 1).size).to eq(0)
       end
 
     end
@@ -90,15 +91,16 @@ describe PseudoEntity::Randoms do
     context "#random_alpha_numeric" do
 
       it "returns X characters" do
-        instance.send(:random_alpha_numeric, 256).size.should eql(256)
+        expect(instance.send(:random_alpha_numeric, 256).size).to eql(256)
       end
 
       it "only generates alphabetic characters or digits" do
-        instance.stub(:rand).and_return(*(0..61).to_a)
-        instance.send(:random_alpha, 256).should be_all_alphabetic_characters
+        i = -1
+        expect(instance).to receive(:rand).exactly(256).times { i = i + 1 % 61 }
+        expect(instance.send(:random_alpha, 256)).to be_all_alphabetic_characters
         # If only alphabetic characters and digits are available then nothing should show up at slot 62
-        instance.stub(:rand).and_return(62)
-        instance.send(:random_alpha_numeric, 1).size.should eq(0)
+        expect(instance).to receive(:rand).and_return(62)
+        expect(instance.send(:random_alpha_numeric, 1).size).to eq(0)
       end
 
     end
@@ -106,8 +108,8 @@ describe PseudoEntity::Randoms do
     context "#random_apartment_number" do
 
       it "never returns zero or less" do
-        instance.stub(:rand).and_return(0)
-        instance.send(:random_apartment_number).should > 0
+        expect(instance).to receive(:rand).and_return(0)
+        expect(instance.send(:random_apartment_number) > 0).to be_truthy
       end
 
     end
@@ -115,11 +117,11 @@ describe PseudoEntity::Randoms do
     context "#random_bank_account_number" do
 
       it "is thirteen characters long" do
-        instance.send(:random_bank_account_number).size.should eql(13)
+        expect(instance.send(:random_bank_account_number).size).to eql(13)
       end
 
       it "is all digits" do
-        instance.send(:random_bank_account_number).should be_all_digits
+        expect(instance.send(:random_bank_account_number)).to be_all_digits
       end
 
     end
@@ -127,11 +129,11 @@ describe PseudoEntity::Randoms do
     context "#random_bank_routing_number" do
 
       it "is nine characters long" do
-        instance.send(:random_bank_routing_number).size.should eql(9)
+        expect(instance.send(:random_bank_routing_number).size).to eql(9)
       end
 
       it "is all digits" do
-        instance.send(:random_bank_routing_number).should be_all_digits
+        expect(instance.send(:random_bank_routing_number)).to be_all_digits
       end
 
     end
@@ -139,11 +141,11 @@ describe PseudoEntity::Randoms do
     context "#random_numeric" do
 
       it "return X characters" do
-        instance.send(:random_alpha_numeric, 256).size.should eql(256)
+        expect(instance.send(:random_alpha_numeric, 256).size).to eql(256)
       end
 
       it "only generates digits" do
-        instance.send(:random_numeric, 256).should be_all_digits
+        expect(instance.send(:random_numeric, 256)).to be_all_digits
       end
 
     end
@@ -151,8 +153,8 @@ describe PseudoEntity::Randoms do
     context "#random_birth_day" do
 
       it "is always be at least 21 years ago" do
-        instance.stub(:rand).and_return(0)
-        (Date.today.year - instance.send(:random_birth_day).year).should >= 21
+        expect(instance).to receive(:rand).and_return(0)
+        expect((Date.today.year - instance.send(:random_birth_day).year) >= 21).to be_truthy
       end
 
     end
@@ -160,7 +162,7 @@ describe PseudoEntity::Randoms do
     context "#random_class_a_ip_address" do
 
       it "is in the private class A range" do
-        instance.send(:random_class_a_ip_address).should =~ class_a_regex
+        expect(instance.send(:random_class_a_ip_address) =~ class_a_regex).to be_truthy
       end
 
     end
@@ -168,7 +170,7 @@ describe PseudoEntity::Randoms do
     context "#random_class_b_ip_address" do
 
       it "is in the private class B range" do
-        instance.send(:random_class_b_ip_address).should =~ class_b_regex
+        expect(instance.send(:random_class_b_ip_address) =~ class_b_regex).to be_truthy
       end
 
     end
@@ -176,7 +178,7 @@ describe PseudoEntity::Randoms do
     context "#random_class_c_ip_address" do
 
       it "is in the private class C range" do
-        instance.send(:random_class_c_ip_address).should =~ class_c_regex
+        expect(instance.send(:random_class_c_ip_address) =~ class_c_regex).to be_truthy
       end
 
     end
@@ -185,7 +187,7 @@ describe PseudoEntity::Randoms do
 
       it "conforms to the pattern name@domain" do
         simple_email_regex = /^.*@.*\..*$/
-        instance.send(:random_email_address) =~ simple_email_regex
+        expect(instance.send(:random_email_address) =~ simple_email_regex).to be_truthy
       end
 
     end
@@ -193,12 +195,17 @@ describe PseudoEntity::Randoms do
     context "#random_facebook_id" do
 
       it "is all digits" do
-        instance.send(:random_facebook_id).should be_all_digits
+        expect(instance.send(:random_facebook_id)).to be_all_digits
       end
 
       it "is a maximum of 64 bits long" do
-        # This is a little brittle but not sure how else to test this
-        instance.should_receive(:rand).with(2**64).and_return(2**64)
+        # rspec chokes on the following, hence the block
+        # expect(instance).to receive(:rand).with(2**64).and_return(2**64)
+        expect(instance).to receive(:rand).once.and_wrap_original do |original_method, *args, &block|
+          expect(args.first).to eql(2**64)
+          2**64
+        end
+
         instance.send(:random_facebook_id)
       end
 
@@ -207,18 +214,18 @@ describe PseudoEntity::Randoms do
     context "#random_federal_tax_id" do
 
       it "is nine characters long" do
-        instance.send(:random_federal_tax_id).size.should eql(9)
+        expect(instance.send(:random_federal_tax_id).size).to eql(9)
       end
 
       it "is all digits" do
-        instance.send(:random_federal_tax_id).should be_all_digits
+        expect(instance.send(:random_federal_tax_id)).to be_all_digits
       end
 
     end
 
     context "#random_google_analytics_account_id" do
       it "conforms to Google's Analytic Account pattern" do
-        instance.send(:random_google_analytics_account_id).should =~ /^UA-\d{7}-\d{2}$/
+        expect(instance.send(:random_google_analytics_account_id) =~ /^UA-\d{7}-\d{2}$/).to be_truthy
       end
     end
 
@@ -234,7 +241,7 @@ describe PseudoEntity::Randoms do
     context "#random_phone_number" do
 
       it "is a ten digit comma separated value" do
-        instance.send(:random_phone_number).should =~ /^[0-9]{3}-[0-9]{3}-[0-9]{4}$/
+        expect(instance.send(:random_phone_number) =~ /^[0-9]{3}-[0-9]{3}-[0-9]{4}$/).to be_truthy
       end
 
     end
@@ -242,8 +249,8 @@ describe PseudoEntity::Randoms do
     context  "#random_property_number" do
 
       it "will never be less than 10" do
-        instance.stub(:rand).and_return(0)
-        instance.send(:random_property_number).should >= 10
+        expect(instance).to receive(:rand).and_return(0)
+        expect(instance.send(:random_property_number) >= 10).to be_truthy
       end
 
     end
@@ -251,8 +258,8 @@ describe PseudoEntity::Randoms do
     context "#random_sex" do
 
       it "will never be less than 10" do
-        instance.stub(:rand).and_return(0)
-        instance.send(:random_property_number).should >= 10
+        expect(instance).to receive(:rand).and_return(0)
+        expect(instance.send(:random_property_number) >= 10).to be_truthy
       end
 
     end
@@ -260,10 +267,15 @@ describe PseudoEntity::Randoms do
     context "#rand_X" do
 
       it "generates a random number" do
-        Kernel.should_receive(:rand).with(10).once.and_call_original
+        # rspec chokes on the following, hence the block
+        # expect(Kernel).to receive(:rand).at_least(:once).with(10).and_call_original
+        expect(Kernel).to receive(:rand).at_least(:once).and_wrap_original do |original_method, *args, &block|
+          expect(args.first).to eql(10)
+          original_method.call(*args, &block)
+        end
         first = instance.rand_10
         second = instance.rand_10
-        first.should eql(second)
+        expect(first).to eql(second)
       end
 
     end
@@ -275,11 +287,11 @@ describe PseudoEntity::Randoms do
     subject(:random) { PseudoEntity::Randoms }
 
     it "creates a token smaller than 32 characters" do
-      random.token(3).size.should eq(3)
+      expect(random.token(3).size).to eq(3)
     end
 
     it "creates a token larger than 32 characters" do
-      random.token(128).size.should eq(128)
+      expect(random.token(128).size).to eq(128)
     end
 
   end
